@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: S3 & DynamoDB for Terraform Backend
+
+Parameters:
+  Env:
+    Type: String
+    AllowedValues:
+      - dev
+    Default: dev
+  ProjectName:
+    Type: String
+
+Resources:
+#------------------------------------------------------------------------------#
+# S3
+#------------------------------------------------------------------------------#
+  TerraformStateBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub ${Env}-${ProjectName}-terraform-state
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+        - Id: ExpireOldVersions
+          NoncurrentVersionExpirationInDays: 90
+          Status: Enabled
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+#------------------------------------------------------------------------------#
+# DynamoDB
+#------------------------------------------------------------------------------#
+  TerraformLockTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Ref TerraformStateBucket
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      AttributeDefinitions:
+        - AttributeName: "LockID"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "LockID"
+          KeyType: "HASH"
+
+Outputs:
+  TerraformStateBucket:
+    Description: Name of the S3 bucket containing Terraform state
+    Value: !Ref TerraformStateBucket
+  TerraformLockTable:
+    Description: Name of the DynamoDB table used to lock Terraform state
+    Value: !Ref TerraformLockTable
