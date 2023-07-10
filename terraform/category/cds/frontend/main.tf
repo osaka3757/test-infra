@@ -20,22 +20,22 @@ provider "aws" {
 }
 
 module "s3" {
-  source            = "./modules/s3"
-  count_of_resource = local.env == "prd" ? 1 : 0
-  project_name      = local.project_name
-  env               = local.env
+  source            = "../../../modules/s3"
+  count_of_resource = var.env == "prd" ? 1 : 0
+  project_name      = var.project_name
+  env               = var.env
 }
 
 module "frontend-codebuild" {
-  source       = "./modules/frontend-codebuild"
-  project_name = local.project_name
-  env          = local.env
+  source       = "../../../modules/frontend-codebuild"
+  project_name = var.project_name
+  env          = var.env
 }
 
 module "frontend-codepipeline" {
-  source                   = "./modules/frontend-codepipeline"
-  project_name             = local.project_name
-  env                      = local.env
+  source                   = "../../../modules/frontend-codepipeline"
+  project_name             = var.project_name
+  env                      = var.env
   frontend_repository_path = local.frontend_repository_path
   codebuild_name           = module.frontend-codebuild.codebuild_name
 }
