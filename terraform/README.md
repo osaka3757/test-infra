@@ -59,7 +59,7 @@ cd ~/shared
 # 環境名とプロジェクト名を変更すること
 aws cloudformation deploy `
 --profile プロファイル名 `
---stack-name 環境名-プロジェクト名-terraform-backend `
+--stack-name プロジェクト名-環境名-terraform-backend `
 --template-file terraform-backend.yaml `
 --parameter-overrides Env=環境名 ProjectName=プロジェクト名 `
 --region ap-northeast-1 `
@@ -70,17 +70,21 @@ aws cloudformation deploy `
 ```
 ## ここもbatファイルにまとめる
 cd ~/category/AWSアカウント/プロジェクト
-terraform init -reconfigure -backend-config="../env/dev.tfvars"
+terraform init -reconfigure -backend-config="../.env/dev.tfvars"
+terraform init -reconfigure -backend-config="../.env/stg.tfvars"
 
 # plan
 cd ~/terraform
-./wrap-tf-cmd.bat plan cds dev category/cds/frontend
+./wrap-tf-cmd.bat plan cds stg category/cds/infra cds-stg
+./wrap-tf-cmd.bat plan cds stg category/cds/back cds-stg
 
 # apply
-./wrap-tf-cmd.bat apply cds dev category/cds/frontend
+./wrap-tf-cmd.bat apply cds stg category/cds/infra cds-stg
+./wrap-tf-cmd.bat apply cds stg category/cds/back cds-stg
 
 # destroy(全てのAWSリソースを削除したい場合に実行する)
-./wrap-tf-cmd.bat destroy cds dev category/cds/frontend
+./wrap-tf-cmd.bat destroy cds stg category/cds/infra cds-stg
+./wrap-tf-cmd.bat destroy cds stg category/cds/back cds-stg
 
 ```
 
@@ -92,3 +96,11 @@ rem %2=プロジェクト名
 rem %3=環境名(prd/stg/dev/person)
 rem %4=terraform実行ファイルがあるディレクトリ
 rem %5=プロファイル名
+
+aws cloudformation deploy `
+--profile cds-stg `
+--stack-name cds-stg-terraform-backend `
+--template-file terraform-backend.yaml `
+--parameter-overrides Env=stg ProjectName=cds `
+--region ap-northeast-1 `
+--no-fail-on-empty-changeset
