@@ -6,20 +6,21 @@ Parameters:
     Type: String
     AllowedValues:
       - dev
+      - stg
     Default: dev
   ProjectName:
     Type: String
 
 Resources:
-#------------------------------------------------------------------------------#
-# S3
-#------------------------------------------------------------------------------#
+  #------------------------------------------------------------------------------#
+  # S3
+  #------------------------------------------------------------------------------#
   TerraformStateBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      BucketName: !Sub ${Env}-${ProjectName}-terraform-state
+      BucketName: !Sub ${ProjectName}-${Env}-terraform-state
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -27,9 +28,9 @@ Resources:
         RestrictPublicBuckets: true
       LifecycleConfiguration:
         Rules:
-        - Id: ExpireOldVersions
-          NoncurrentVersionExpirationInDays: 90
-          Status: Enabled
+          - Id: ExpireOldVersions
+            NoncurrentVersionExpirationInDays: 90
+            Status: Enabled
       VersioningConfiguration:
         Status: Enabled
       BucketEncryption:
@@ -37,9 +38,9 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
 
-#------------------------------------------------------------------------------#
-# DynamoDB
-#------------------------------------------------------------------------------#
+  #------------------------------------------------------------------------------#
+  # DynamoDB
+  #------------------------------------------------------------------------------#
   TerraformLockTable:
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Retain

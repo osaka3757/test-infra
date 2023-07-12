@@ -1,4 +1,5 @@
 ## 課題
+- README.mdの整理
 - tflint入れたい
 - tfsec入れたい
 - terraform-docs入れたい
@@ -6,7 +7,7 @@
 - VSCodeにvscode-terraformをインストールしたら自動フォーマットかかるようにする
 - terraform plan時にAWSリソースで使用しない変数をアップロードしているとWarningが出ているので解消すること
 
-## ディレクトリ構成
+## ディレクトリ構成　※整理中
 ```
 .
 ├── .vscode
@@ -44,10 +45,12 @@
 - AWS プロファイルを設定
 - AWS プロファイルにMFA設定を追加
 - terraform-variables.tfのproject_nameを修正する
+- CodeStar Connection 作成後に手動で AWSコンソール Codepipeline 設定 接続から GitHub の認証を行う必要がある(初回のみ)
+  - [GitHub認証の参考サイト](https://zenn.dev/taroman_zenn/articles/4007a33384c6ad)
 
-## 環境構築
-- 環境名の切り替えは、terraform workspaceで行います
+## 環境構築　※整理中
 - 環境名はdev/stg/prdを3環境を想定しています
+- backendのkeyの値を変更する必要がある
 
 1. TerraformのState管理用バックエンド作成(初回のみ)
 ```
@@ -56,33 +59,48 @@ cd ~/shared
 # 環境名とプロジェクト名を変更すること
 aws cloudformation deploy `
 --profile プロファイル名 `
---stack-name 環境名-プロジェクト名-terraform-backend `
+--stack-name プロジェクト名-環境名-terraform-backend `
 --template-file terraform-backend.yaml `
 --parameter-overrides Env=環境名 ProjectName=プロジェクト名 `
 --region ap-northeast-1 `
 --no-fail-on-empty-changeset
 ```
-2. environments配下の各環境フォルダにある「環境名.tfvars」の設定値を変更する(初回のみ)
-3. 必要なAWSリソースを作成
+
+2. 必要なAWSリソースを作成
 ```
+## ここもbatファイルにまとめる
+cd ~/category/AWSアカウント/プロジェクト
+terraform init -reconfigure -backend-config="../.env/dev.tfvars"
+terraform init -reconfigure -backend-config="../.env/stg.tfvars"
+
+# plan
 cd ~/terraform
+./wrap-tf-cmd.bat plan cds stg category/cds/infra cds-stg
+./wrap-tf-cmd.bat plan cds stg category/cds/back cds-stg
 
-terraform init -reconfigure -backend-config="./environments/環境名/環境名.tfvars"
+# apply
+./wrap-tf-cmd.bat apply cds stg category/cds/infra cds-stg
+./wrap-tf-cmd.bat apply cds stg category/cds/back cds-stg
 
-# 各環境の初回デプロイ時にのみ実行
-terraform workspace new 環境名
+# destroy(全てのAWSリソースを削除したい場合に実行する)
+./wrap-tf-cmd.bat destroy cds stg category/cds/infra cds-stg
+./wrap-tf-cmd.bat destroy cds stg category/cds/back cds-stg
 
-terraform workspace select 環境名
-terraform validate
-terraform plan -var-file ./environments/環境名/環境名.tfvars -out 環境名-plan.tfplan
-
-# plan結果をjson形式に変換(飛ばして良い)
-terraform show -json plan.tfplan > plan.json 
-
-terraform apply "環境名-plan.tfplan"
-
-# 全てのAWSリソースを削除したい場合に実行する
-terraform destroy
 ```
-4. CodeStar Connection 作成後に手動で AWSコンソール Codepipeline 設定 接続から GitHub の認証を行う必要がある(初回のみ)
-  - [GitHub認証の参考サイト](https://zenn.dev/taroman_zenn/articles/4007a33384c6ad)
+
+
+### 退避場所
+rem 引数説明
+rem %1=terraformコマンド(plan/apply)
+rem %2=プロジェクト名
+rem %3=環境名(prd/stg/dev/person)
+rem %4=terraform実行ファイルがあるディレクトリ
+rem %5=プロファイル名
+
+aws cloudformation deploy `
+--profile cds-stg `
+--stack-name cds-stg-terraform-backend `
+--template-file terraform-backend.yaml `
+--parameter-overrides Env=stg ProjectName=cds `
+--region ap-northeast-1 `
+--no-fail-on-empty-changeset

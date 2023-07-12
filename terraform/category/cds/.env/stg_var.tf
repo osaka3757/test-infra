@@ -1,0 +1,8 @@
+vpc_cidr_block               = "10.1.0.0/16"
+public_subnet_1a_cidr_block  = "10.1.1.0/24"
+public_subnet_1c_cidr_block  = "10.1.2.0/24"
+private_subnet_1a_cidr_block = "10.1.11.0/24"
+private_subnet_1c_cidr_block = "10.1.12.0/24"
+state_bucket                 = "cds-stg-terraform-state"
+profile                      = "cds-stg"
+customer_prefix              = "cds-customer-stg"
