@@ -1,5 +1,5 @@
-resource "aws_ecr_repository" "api" {
-  name                 = var.ecr_container_name
+resource "aws_ecr_repository" "customer_api" {
+  name                 = "${var.customer_prefix}/api"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -8,7 +8,7 @@ resource "aws_ecr_repository" "api" {
 }
 
 resource "aws_ecr_repository_policy" "api" {
-  repository = aws_ecr_repository.api.name
+  repository = aws_ecr_repository.customer_api.name
 
   policy = data.aws_iam_policy_document.api.json
 }

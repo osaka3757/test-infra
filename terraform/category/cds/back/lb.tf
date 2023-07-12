@@ -1,5 +1,5 @@
 resource "aws_lb" "alb" {
-  name            = "${var.project_name}-alb"
+  name            = "${var.customer_prefix}-alb"
   internal        = false
   security_groups = [aws_security_group.alb.id]
   subnets = [
@@ -15,8 +15,8 @@ resource "aws_lb" "alb" {
   }
 }
 
-resource "aws_lb_target_group" "lb_target_blue" {
-  name        = "${var.project_name}-blue"
+resource "aws_lb_target_group" "alb_target_blue" {
+  name        = "${var.customer_prefix}-blue"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = data.terraform_remote_state.infra.outputs.vpc_id
@@ -35,8 +35,8 @@ resource "aws_lb_target_group" "lb_target_blue" {
 
 }
 
-resource "aws_lb_target_group" "lb_target_green" {
-  name        = "${var.project_name}-green"
+resource "aws_lb_target_group" "alb_target_green" {
+  name        = "${var.customer_prefix}-green"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = data.terraform_remote_state.infra.outputs.vpc_id
@@ -56,7 +56,7 @@ resource "aws_lb_target_group" "lb_target_green" {
 }
 
 # Listeners
-resource "aws_lb_listener" "lb_listener" {
+resource "aws_lb_listener" "alb_listener" {
   load_balancer_arn = aws_lb.alb.arn
   port              = 80
   protocol          = "HTTP"
@@ -66,19 +66,19 @@ resource "aws_lb_listener" "lb_listener" {
   }
 
   default_action {
-    target_group_arn = aws_lb_target_group.lb_target_blue.arn
+    target_group_arn = aws_lb_target_group.alb_target_blue.arn
     type             = "forward"
   }
 
   depends_on = [
     aws_lb.alb,
-    aws_lb_target_group.lb_target_blue
+    aws_lb_target_group.alb_target_blue
   ]
 }
 
 # ALB LOG
 resource "aws_s3_bucket" "alb_log" {
-  bucket = "${var.project_name}-alb-log"
+  bucket = "${var.customer_prefix}-alb-log"
 }
 
 # ライフサイクルルールの設定

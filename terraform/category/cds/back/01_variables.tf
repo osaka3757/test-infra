@@ -2,7 +2,7 @@ locals {
   frontend_repository_path = "osaka3757/cds-customer-frontend"
 }
 
-variable "ecr_container_name" {
+variable "customer_prefix" {
   type = string
 }
 

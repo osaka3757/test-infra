@@ -1,5 +1,5 @@
-resource "aws_ecs_cluster" "main" {
-  name = var.ecr_container_name
+resource "aws_ecs_cluster" "customer_api" {
+  name = "${var.customer_prefix}-cluster"
   #capacity_providers = ["FARGATE"]
   #capacity_providers = ["FARGATE", "FARGATE_SPOT"]
   #default_capacity_provider_strategy {
@@ -18,6 +18,6 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
-resource "aws_cloudwatch_log_group" "ecs_log_group_api" {
-  name = "/ecs/${var.ecr_container_name}"
+resource "aws_cloudwatch_log_group" "ecs_log_group_customer_api" {
+  name = "/ecs/${var.customer_prefix}"
 }

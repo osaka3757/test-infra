@@ -1,5 +1,5 @@
-resource "aws_ecs_task_definition" "task" {
-  family                   = var.project_name
+resource "aws_ecs_task_definition" "customer_task" {
+  family                   = "${var.customer_prefix}-api"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = aws_iam_role.task_execution.arn
@@ -9,20 +9,21 @@ resource "aws_ecs_task_definition" "task" {
   container_definitions    = <<TASK_DEFINITION
 [
   {
-    "name": "${var.ecr_container_name}",
-    "image": "${data.aws_caller_identity.current.account_id}.dkr.ecr.ap-northeast-1.amazonaws.com/${var.ecr_container_name}:1.0.0",
+    "name": "${var.customer_prefix}-container",
+    "image": "${data.aws_caller_identity.current.account_id}.dkr.ecr.ap-northeast-1.amazonaws.com/${aws_ecr_repository.customer_api.name}:1.0.0",
     "portMappings": [
       {
         "containerPort": 80,
+        "hostPort": 80,
         "protocol": "tcp"
       }
     ],
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "/ecs/${var.ecr_container_name}",
+        "awslogs-group": "/ecs/${var.customer_prefix}",
         "awslogs-region": "ap-northeast-1",
-        "awslogs-stream-prefix": "${var.ecr_container_name}"
+        "awslogs-stream-prefix": "${var.customer_prefix}"
       }
     },
     "linuxParameters": {

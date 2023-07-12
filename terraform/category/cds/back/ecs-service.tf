@@ -1,7 +1,7 @@
-resource "aws_ecs_service" "ecs" {
-  name                               = var.project_name
-  cluster                            = aws_ecs_cluster.main.id
-  task_definition                    = "${aws_ecs_task_definition.task.family}:${aws_ecs_task_definition.task.revision}"
+resource "aws_ecs_service" "customer_api" {
+  name                               = "${var.customer_prefix}-service"
+  cluster                            = aws_ecs_cluster.customer_api.id
+  task_definition                    = "${aws_ecs_task_definition.customer_task.family}:${aws_ecs_task_definition.customer_task.revision}"
   desired_count                      = 1
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = 50
@@ -23,16 +23,16 @@ resource "aws_ecs_service" "ecs" {
 
   # ECSタスクの起動後に紐付けるELBターゲットグループ
   load_balancer {
-    target_group_arn = aws_lb_target_group.lb_target_blue.arn
-    container_name   = var.ecr_container_name
+    target_group_arn = aws_lb_target_group.alb_target_blue.arn
+    container_name   = "${var.customer_prefix}-container"
     container_port   = 80
   }
 
   scheduling_strategy = "REPLICA"
 
-  deployment_controller {
-    type = "CODE_DEPLOY"
-  }
+  # deployment_controller {
+  #   type = "CODE_DEPLOY"
+  # }
 
   lifecycle {
     ignore_changes = [
@@ -45,7 +45,7 @@ resource "aws_ecs_service" "ecs" {
   propagate_tags = "TASK_DEFINITION"
 
   depends_on = [
-    aws_lb_target_group.lb_target_blue
+    aws_lb_target_group.alb_target_blue
   ]
 
 }

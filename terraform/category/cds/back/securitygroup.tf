@@ -1,7 +1,7 @@
 # ALB SecurityGroup
 resource "aws_security_group" "alb" {
-  name        = "${var.project_name}-alb-sg"
-  description = "${var.project_name}-alb-sg"
+  name        = "${var.customer_prefix}-alb-sg"
+  description = "${var.customer_prefix}-alb-sg"
   vpc_id      = data.terraform_remote_state.infra.outputs.vpc_id
 
   # セキュリティグループ内のリソースからインターネットへのアクセスを許可する
@@ -13,7 +13,7 @@ resource "aws_security_group" "alb" {
   }
 
   tags = {
-    Name = "${var.project_name}-alb-sg"
+    Name = "${var.customer_prefix}-alb-sg"
   }
 }
 
@@ -45,10 +45,9 @@ resource "aws_security_group_rule" "alb_https" {
 
 # ECS SecurityGroup
 resource "aws_security_group" "ecs" {
-  name        = "${var.project_name}-ecs-sg"
-  description = "${var.project_name}-ecs-sg"
+  name        = "${var.customer_prefix}-ecs-sg"
+  description = "${var.customer_prefix}-ecs-sg"
   vpc_id      = data.terraform_remote_state.infra.outputs.vpc_id
-
 
   egress {
     from_port   = 0
@@ -58,7 +57,7 @@ resource "aws_security_group" "ecs" {
   }
 
   tags = {
-    Name = "${var.project_name}-ecs-sg"
+    Name = "${var.customer_prefix}-ecs-sg"
   }
 }
 
