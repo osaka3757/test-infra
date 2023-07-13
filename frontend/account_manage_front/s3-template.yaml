@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: create Account Manage Frontend Infra S3
+
+Parameters:
+  Env:
+    Type: String
+    AllowedValues:
+      - dev
+      - stg
+    Default: dev
+  ProjectName:
+    Type: String
+
+Resources:
+  # ------------------------------------------------------------#
+  #  S3 Bucket
+  # ------------------------------------------------------------#
+  AccountManageFrontendContentBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-account-manage-${Env}-frontend-content
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LoggingConfiguration:
+        DestinationBucketName: !Ref AccountManageFrontendContentAccesslogsBucket
+        LogFilePrefix: !Sub ${Env}
+
+  AccountManageFrontendContentAccesslogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: LogDeliveryWrite
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
+      BucketName: !Sub ${ProjectName}-account-manage-${Env}-frontend-content-accesslogs
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: AutoDelete
+            Status: Enabled
+            ExpirationInDays: 90
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  WaflogsAccountManageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: LogDeliveryWrite
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
+      BucketName: !Sub aws-waf-logs-${ProjectName}-account-manage-${Env}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: AutoDelete
+            Status: Enabled
+            ExpirationInDays: 90
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+Outputs:
+  AccountManageFrontendContentName:
+    Value: !Ref AccountManageFrontendContentBucket
+    Export:
+      Name: AccountManageFrontendContentName
+  AccountManageFrontendContentRegionalDomainName:
+    Value: !GetAtt AccountManageFrontendContentBucket.RegionalDomainName
+    Export:
+      Name: AccountManageFrontendContentRegionalDomainName
+  AccountManageFrontendContentAccesslogsBucketName:
+    Value: !Ref AccountManageFrontendContentAccesslogsBucket
+    Export:
+      Name: AccountManageFrontendContentAccesslogsBucketName
+  WaflogsAccountManageBucketArn:
+    Value: !GetAtt WaflogsAccountManageBucket.Arn
+    Export:
+      Name: WaflogsAccountManageBucketArn
