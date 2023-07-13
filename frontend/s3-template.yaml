@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: create Frontend Infra S3
+
+Parameters:
+  Env:
+    Type: String
+    AllowedValues:
+      - dev
+      - stg
+    Default: dev
+  ProjectName:
+    Type: String
+
+Resources:
+  # ------------------------------------------------------------#
+  #  S3 Bucket
+  # ------------------------------------------------------------#
+  FrontendContentBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-customer-${Env}-frontend-content
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LoggingConfiguration:
+        DestinationBucketName: !Ref FrontendContentAccesslogsBucket
+        LogFilePrefix: !Sub ${Env}
+
+  FrontendContentAccesslogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: LogDeliveryWrite
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
+      BucketName: !Sub ${ProjectName}-customer-${Env}-frontend-content-accesslogs
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: AutoDelete
+            Status: Enabled
+            ExpirationInDays: 90
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  WaflogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: LogDeliveryWrite
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
+      BucketName: !Sub aws-waf-logs-${ProjectName}-customer-${Env}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: AutoDelete
+            Status: Enabled
+            ExpirationInDays: 90
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+Outputs:
+  CustomerFrontendContentName:
+    Value: !Ref FrontendContentBucket
+    Export:
+      Name: CustomerFrontendContentName
+  CustomerFrontendContentRegionalDomainName:
+    Value: !GetAtt FrontendContentBucket.RegionalDomainName
+    Export:
+      Name: CustomerFrontendContentRegionalDomainName
+  FrontendContentAccesslogsBucketName:
+    Value: !Ref FrontendContentAccesslogsBucket
+    Export:
+      Name: FrontendContentAccesslogsBucketName
+  WaflogsBucketArn:
+    Value: !GetAtt WaflogsBucket.Arn
+    Export:
+      Name: WaflogsBucketArn

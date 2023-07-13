@@ -10,11 +10,21 @@
 
 ## デプロイコマンド
 ```
+# S3
 aws cloudformation deploy `
---profile プロファイル名 `
---stack-name 環境名-プロジェクト名-frontend `
+--profile cds-stg `
+--stack-name cds-customer-stg-front `
+--template-file s3-template.yaml `
+--parameter-overrides Env=stg ProjectName=cds `
+--region ap-northeast-1 `
+--no-fail-on-empty-changeset
+
+# CloudFront/WAF
+aws cloudformation deploy `
+--profile cds-stg `
+--stack-name cds-customer-stg-front `
 --template-file template.yaml `
---parameter-overrides Env=環境名 ProjectName=プロジェクト名 `
+--parameter-overrides Env=stg ProjectName=cds `
 --region us-east-1 `
 --no-fail-on-empty-changeset
 ```
