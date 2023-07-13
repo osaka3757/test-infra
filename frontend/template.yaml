@@ -6,108 +6,16 @@ Parameters:
     Type: String
     AllowedValues:
       - dev
+      - stg
     Default: dev
-  ProjectName:
-    Type: String
-    Default: test
 
 Resources:
-  # ------------------------------------------------------------#
-  #  S3 Bucket
-  # ------------------------------------------------------------#
-  FrontendContentBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub ${Env}-${ProjectName}-frontend-content
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      AccessControl: Private
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      LoggingConfiguration:
-        DestinationBucketName: !Ref FrontendContentAccesslogsBucket
-        LogFilePrefix: !Sub ${Env}
-
-  FrontendContentAccesslogsBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      AccessControl: LogDeliveryWrite
-      OwnershipControls:
-        Rules:
-          - ObjectOwnership: ObjectWriter
-      BucketName: !Sub ${Env}-${ProjectName}-frontend-content-accesslogs
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      LifecycleConfiguration:
-        Rules:
-          - Id: AutoDelete
-            Status: Enabled
-            ExpirationInDays: 90
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-
-  WaflogsBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      AccessControl: LogDeliveryWrite
-      OwnershipControls:
-        Rules:
-          - ObjectOwnership: ObjectWriter
-      BucketName: !Sub aws-waf-logs-${Env}-${ProjectName}
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      LifecycleConfiguration:
-        Rules:
-          - Id: AutoDelete
-            Status: Enabled
-            ExpirationInDays: 90
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-
-  # to allow access from CloudFront OAC
-  FrontendContentBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref FrontendContentBucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: AllowCloudFrontServicePrincipalReadOnly
-            Effect: Allow
-            Principal:
-              Service:
-                - cloudfront.amazonaws.com
-            Action: s3:GetObject
-            Resource: !Sub arn:aws:s3:::${FrontendContentBucket}/*
-            Condition:
-              StringEquals:
-                AWS:SourceArn:
-                  - !Join
-                    - /
-                    - - !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution
-                      - !Ref CloudFrontDistribution
-
   # ------------------------------------------------------------#
   #  WAF v2
   # ------------------------------------------------------------#
   WebAcl:
     Type: AWS::WAFv2::WebACL
-    Properties: 
+    Properties:
       Name: !Sub ${Env}-web-acl
       Scope: CLOUDFRONT
       DefaultAction:
@@ -117,8 +25,7 @@ Resources:
         SampledRequestsEnabled: true
         MetricName: !Sub ${Env}-web-acl
       Rules:
-        -
-          Name: AWS-AWSManagedRulesCommonRuleSet
+        - Name: AWS-AWSManagedRulesCommonRuleSet
           Priority: 1
           Statement:
             RuleGroupReferenceStatement:
@@ -158,7 +65,7 @@ Resources:
     Type: AWS::WAFv2::LoggingConfiguration
     Properties:
       LogDestinationConfigs:
-        - !GetAtt WaflogsBucket.Arn
+        - arn:aws:s3:::aws-waf-logs-cds-customer-stg
       ResourceArn: !GetAtt WebAcl.Arn
 
   # ------------------------------------------------------------#
@@ -196,20 +103,20 @@ Resources:
 
           return request;
         }
-        
+
   # ------------------------------------------------------------#
   #  CloudFront
   # ------------------------------------------------------------#
-    # CachePolicy
+  # CachePolicy
   # CloudFrontCachePolicy:
   #   Type: AWS::CloudFront::CachePolicy
-  #   Properties: 
-  #     CachePolicyConfig: 
+  #   Properties:
+  #     CachePolicyConfig:
   #       DefaultTTL: 0
   #       MaxTTL: 0
   #       MinTTL: 0
   #       Name: BaseCachePolicyConfig
-  #       ParametersInCacheKeyAndForwardedToOrigin: 
+  #       ParametersInCacheKeyAndForwardedToOrigin:
   #         CookiesConfig:
   #           CookieBehavior: none
   #         EnableAcceptEncodingGzip: false
@@ -244,7 +151,10 @@ Resources:
             ResponsePagePath: /index.html
         DefaultRootObject: index.html
         DefaultCacheBehavior:
-          TargetOriginId: !Sub S3origin-${FrontendContentBucket}
+          TargetOriginId: !Join
+            - "-"
+            - - S3origin
+              - "cds-customer-stg-frontend-content"
           Compress: true
           ViewerProtocolPolicy: redirect-to-https
           AllowedMethods:
@@ -263,24 +173,54 @@ Resources:
         HttpVersion: http2and3
         Logging:
           IncludeCookies: false
-          Bucket: !Sub ${FrontendContentAccesslogsBucket}.s3-${AWS::Region}.amazonaws.com
+          Bucket: !Join
+            - "."
+            - - "cds-customer-stg-frontend-content-accesslogs"
+              - !Sub s3-${AWS::Region}
+              - amazonaws.com
           Prefix: cloudfront
         Origins:
-          - Id: !Sub S3origin-${FrontendContentBucket}
-            DomainName: !GetAtt FrontendContentBucket.RegionalDomainName
+          - Id: !Join
+              - "-"
+              - - S3origin
+                - "cds-customer-stg-frontend-content"
+            DomainName: "cds-customer-stg-frontend-content.s3.ap-northeast-1.amazonaws.com"
             OriginAccessControlId: !Ref CloudFrontOriginAccessControl
             S3OriginConfig:
               OriginAccessIdentity: ""
         PriceClass: PriceClass_All
         WebACLId: !GetAtt WebAcl.Arn
 
+  # to allow access from CloudFront OAC
+  FrontendContentBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: "cds-customer-stg-frontend-content"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipalReadOnly
+            Effect: Allow
+            Principal:
+              Service:
+                - cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Join
+              - ""
+              - - "arn:aws:s3:::"
+                - "cds-customer-stg-frontend-content"
+                - /*
+            Condition:
+              StringEquals:
+                AWS:SourceArn:
+                  - !Join
+                    - /
+                    - - !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution
+                      - !Ref CloudFrontDistribution
+
 Outputs:
-  FrontendContentBucket:
-    Value: !Ref FrontendContentBucket
   FrontendContentBucketPolicy:
     Value: !Ref FrontendContentBucketPolicy
-  FrontendContentAccesslogsBucket:
-    Value: !Ref FrontendContentAccesslogsBucket
   CloudFrontDistribution:
     Value: !Ref CloudFrontDistribution
   CloudFrontOriginAccessControl:
