@@ -1,10 +1,10 @@
 resource "aws_lb" "alb" {
-  name            = "${var.customer_prefix}-alb"
+  name            = "${var.account_manage_prefix}-alb"
   internal        = false
   security_groups = [aws_security_group.alb.id]
   subnets = [
-    data.terraform_remote_state.infra.outputs.private_subnet_1a_id,
-    data.terraform_remote_state.infra.outputs.private_subnet_1c_id
+    data.terraform_remote_state.infra.outputs.public_subnet_1a_id,
+    data.terraform_remote_state.infra.outputs.public_subnet_1c_id
   ]
   load_balancer_type = "application"
 
@@ -16,7 +16,7 @@ resource "aws_lb" "alb" {
 }
 
 resource "aws_lb_target_group" "alb_target_blue" {
-  name        = "${var.customer_prefix}-blue"
+  name        = "${var.account_manage_prefix}-blue"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = data.terraform_remote_state.infra.outputs.vpc_id
@@ -29,14 +29,13 @@ resource "aws_lb_target_group" "alb_target_blue" {
     protocol            = "HTTP"
     port                = "traffic-port"
   }
-  depends_on = [
-    aws_lb.alb
-  ]
-
+  # depends_on = [
+  #   aws_lb.alb
+  # ]
 }
 
 resource "aws_lb_target_group" "alb_target_green" {
-  name        = "${var.customer_prefix}-green"
+  name        = "${var.account_manage_prefix}-green"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = data.terraform_remote_state.infra.outputs.vpc_id
@@ -50,9 +49,9 @@ resource "aws_lb_target_group" "alb_target_green" {
     port                = "traffic-port"
   }
 
-  depends_on = [
-    aws_lb.alb
-  ]
+  # depends_on = [
+  #   aws_lb.alb
+  # ]
 }
 
 # Listeners
@@ -70,15 +69,62 @@ resource "aws_lb_listener" "alb_listener" {
     type             = "forward"
   }
 
-  depends_on = [
-    aws_lb.alb,
-    aws_lb_target_group.alb_target_blue
-  ]
+  # depends_on = [
+  #   aws_lb.alb,
+  #   aws_lb_target_group.alb_target_blue
+  # ]
 }
+
+# Listener Rule
+resource "aws_lb_listener_rule" "blue_alb_listener_rule_allowed_ip" {
+  listener_arn = aws_lb_listener.alb_listener.arn
+  priority     = 10
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.alb_target_blue.arn
+  }
+
+  condition {
+    source_ip { values = var.allowed_ip_address }
+  }
+}
+
+resource "aws_lb_listener_rule" "blue_alb_listener_rule_denied_ip" {
+  listener_arn = aws_lb_listener.alb_listener.arn
+  priority     = 20
+
+  action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "application/json"
+      message_body = "{}"
+      status_code  = "404"
+    }
+  }
+
+  condition {
+    source_ip { values = var.denied_ip_address }
+  }
+}
+
+# resource "aws_lb_listener_rule" "green_alb_listener_rule_ip" {
+#   listener_arn = aws_lb_listener.alb_listener.arn
+
+#   action {
+#     type             = "forward"
+#     target_group_arn = aws_lb_target_group.alb_target_green.arn
+#   }
+
+#   condition {
+#     source_ip { values = var.allowed_ip_address }
+#   }
+# }
 
 # ALB LOG
 resource "aws_s3_bucket" "alb_log" {
-  bucket = "${var.customer_prefix}-alb-log"
+  bucket = "${var.account_manage_prefix}-alb-log"
 }
 
 # ライフサイクルルールの設定

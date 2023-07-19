@@ -2,7 +2,7 @@ locals {
   frontend_repository_path = "osaka3757/cds-customer-frontend"
 }
 
-variable "customer_prefix" {
+variable "account_manage_prefix" {
   type = string
 }
 
@@ -41,4 +41,12 @@ variable "private_subnet_1a_cidr_block" {
 
 variable "private_subnet_1c_cidr_block" {
   type = string
+}
+
+variable "allowed_ip_address" {
+  type = list(string)
+}
+
+variable "denied_ip_address" {
+  type = list(string)
 }

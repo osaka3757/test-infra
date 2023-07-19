@@ -1,0 +1,229 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: create Account Manage Frontend Infra
+
+Parameters:
+  Env:
+    Type: String
+    AllowedValues:
+      - dev
+      - stg
+    Default: dev
+  ProjectName:
+    Type: String
+
+Resources:
+  # ------------------------------------------------------------#
+  #  WAF v2
+  # ------------------------------------------------------------#
+  WebAcl:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Sub ${ProjectName}-account-manage-${Env}-frontend-web-acl
+      Scope: CLOUDFRONT
+      DefaultAction:
+        Allow: {}
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        SampledRequestsEnabled: true
+        MetricName: !Sub ${ProjectName}-account-manage-${Env}-frontend-web-acl
+      Rules:
+        - Name: AWS-AWSManagedRulesCommonRuleSet
+          Priority: 1
+          Statement:
+            RuleGroupReferenceStatement:
+              Arn: !GetAtt RuleGroup.Arn
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            SampledRequestsEnabled: true
+            MetricName: AWS-AWSManagedRulesCommonRuleSet
+
+  RuleGroup:
+    Type: AWS::WAFv2::RuleGroup
+    Properties:
+      Capacity: 10
+      Name: !Sub "${ProjectName}-account-manage-${Env}-FrontendRateRestrictionRuleGroup"
+      Rules:
+        - Action:
+            Block: {}
+          Name: !Sub "${ProjectName}-account-manage-${Env}-FrontendRateRestrictionRuleGroup"
+          Priority: 0
+          Statement:
+            RateBasedStatement:
+              AggregateKeyType: IP
+              Limit: 100
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub "${ProjectName}-account-manage-${Env}-FrontendRateRestrictionRuleGroup"
+            SampledRequestsEnabled: true
+      Scope: CLOUDFRONT
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: !Sub "${ProjectName}-account-manage-${Env}-FrontendRateRestrictionRuleGroup"
+        SampledRequestsEnabled: true
+
+  WafLogConfig:
+    Type: AWS::WAFv2::LoggingConfiguration
+    Properties:
+      LogDestinationConfigs:
+        - !Sub arn:aws:s3:::aws-waf-logs-${ProjectName}-account-manage-${Env}
+      ResourceArn: !GetAtt WebAcl.Arn
+
+  # ------------------------------------------------------------#
+  #  CloudFront Functions
+  # ------------------------------------------------------------#
+  FrontendBasicAuthFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: !Sub "${ProjectName}-account-manage-${Env}-FrontendBasicAuth"
+      AutoPublish: true
+      FunctionConfig:
+        Comment: FrontendBasicAuth
+        Runtime: cloudfront-js-1.0
+      FunctionCode: |
+        function handler(event) {
+          var request = event.request;
+          var headers = request.headers;
+
+          // echo -n user:pass | base64
+          var authUser = "nohara";
+          var authPass = "nohara-1234";
+          var tmp = authUser + ':' + authPass;
+          var authString = 'Basic ' + tmp.toString('base64');
+
+          if (
+            typeof headers.authorization === "undefined" ||
+            headers.authorization.value !== authString
+          ) {
+            return {
+              statusCode: 401,
+              statusDescription: "Unauthorized",
+              headers: { "www-authenticate": { value: "Basic" } }
+            };
+          }
+
+          return request;
+        }
+
+  # ------------------------------------------------------------#
+  #  CloudFront
+  # ------------------------------------------------------------#
+  # CachePolicy
+  # CloudFrontCachePolicy:
+  #   Type: AWS::CloudFront::CachePolicy
+  #   Properties:
+  #     CachePolicyConfig:
+  #       DefaultTTL: 0
+  #       MaxTTL: 0
+  #       MinTTL: 0
+  #       Name: BaseCachePolicyConfig
+  #       ParametersInCacheKeyAndForwardedToOrigin:
+  #         CookiesConfig:
+  #           CookieBehavior: none
+  #         EnableAcceptEncodingGzip: false
+  #         HeadersConfig:
+  #           HeaderBehavior: none
+  #         QueryStringsConfig:
+  #           QueryStringBehavior: none
+
+  # Origin Access Control(OAC)
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Description: !Sub OAC for ${ProjectName}-account-manage-${Env}-frontend-content
+        Name: !Sub ${ProjectName}-account-manage-${Env}-frontend-origin-access-control
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        CustomErrorResponses:
+          - ErrorCachingMinTTL: 10
+            ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCachingMinTTL: 10
+            ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        DefaultRootObject: index.html
+        DefaultCacheBehavior:
+          TargetOriginId: !Join
+            - "-"
+            - - S3origin
+              - !Sub "${ProjectName}-account-manage-${Env}-frontend-content"
+          Compress: true
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachedMethods:
+            - GET
+            - HEAD
+          # https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-managed-cache-policies.html
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 #CachingOptimized
+          # CachePolicyId: !Ref CloudFrontCachePolicy
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt FrontendBasicAuthFunction.FunctionARN
+        Enabled: true
+        HttpVersion: http2and3
+        Logging:
+          IncludeCookies: false
+          Bucket: !Join
+            - "."
+            - - !Sub "${ProjectName}-account-manage-${Env}-frontend-content-accesslogs"
+              - !Sub s3-${AWS::Region}
+              - amazonaws.com
+          Prefix: cloudfront
+        Origins:
+          - Id: !Join
+              - "-"
+              - - S3origin
+                - !Sub "${ProjectName}-account-manage-${Env}-frontend-content"
+            DomainName: !Sub "${ProjectName}-account-manage-${Env}-frontend-content.s3.ap-northeast-1.amazonaws.com"
+            OriginAccessControlId: !Ref CloudFrontOriginAccessControl
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+        PriceClass: PriceClass_All
+        WebACLId: !GetAtt WebAcl.Arn
+
+  # to allow access from CloudFront OAC
+  FrontendContentBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Sub "${ProjectName}-account-manage-${Env}-frontend-content"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipalReadOnly
+            Effect: Allow
+            Principal:
+              Service:
+                - cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Join
+              - ""
+              - - "arn:aws:s3:::"
+                - !Sub "${ProjectName}-account-manage-${Env}-frontend-content"
+                - /*
+            Condition:
+              StringEquals:
+                AWS:SourceArn:
+                  - !Join
+                    - /
+                    - - !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution
+                      - !Ref CloudFrontDistribution
+
+Outputs:
+  FrontendContentBucketPolicy:
+    Value: !Ref FrontendContentBucketPolicy
+  CloudFrontDistribution:
+    Value: !Ref CloudFrontDistribution
+  CloudFrontOriginAccessControl:
+    Value: !Ref CloudFrontOriginAccessControl
