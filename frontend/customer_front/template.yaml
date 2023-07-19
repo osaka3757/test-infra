@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: create Frontend Infra
+Description: create Customer Frontend Infra
 
 Parameters:
   Env:
@@ -8,6 +8,12 @@ Parameters:
       - dev
       - stg
     Default: dev
+  ProjectName:
+    Type: String
+  WiFiIP:
+    Type: String
+  VPNIP:
+    Type: String
 
 Resources:
   # ------------------------------------------------------------#
@@ -16,50 +22,62 @@ Resources:
   WebAcl:
     Type: AWS::WAFv2::WebACL
     Properties:
-      Name: !Sub ${Env}-web-acl
+      Name: !Sub ${Env}-web-acl-customer
       Scope: CLOUDFRONT
       DefaultAction:
-        Allow: {}
+        Block:
+          CustomResponse:
+            ResponseCode: 403
       VisibilityConfig:
         CloudWatchMetricsEnabled: true
         SampledRequestsEnabled: true
-        MetricName: !Sub ${Env}-web-acl
-      Rules:
-        - Name: AWS-AWSManagedRulesCommonRuleSet
-          Priority: 1
-          Statement:
-            RuleGroupReferenceStatement:
-              Arn: !GetAtt RuleGroup.Arn
-          OverrideAction:
-            None: {}
-          VisibilityConfig:
-            CloudWatchMetricsEnabled: true
-            SampledRequestsEnabled: true
-            MetricName: AWS-AWSManagedRulesCommonRuleSet
-
-  RuleGroup:
-    Type: AWS::WAFv2::RuleGroup
-    Properties:
-      Capacity: 10
-      Name: !Sub "${Env}-RateRestrictionRuleGroup"
+        MetricName: !Sub ${Env}-web-acl-customer
       Rules:
         - Action:
-            Block: {}
-          Name: !Sub "${Env}-RateRestrictionRule"
+            Allow: {}
+          Name: !Sub "${ProjectName}-customer-${Env}-RestrictIP-Allowed"
           Priority: 0
           Statement:
-            RateBasedStatement:
-              AggregateKeyType: IP
-              Limit: 100
+            IPSetReferenceStatement:
+              Arn: !GetAtt IPWhiteList.Arn
           VisibilityConfig:
             CloudWatchMetricsEnabled: true
-            MetricName: !Sub "${Env}-RateRestrictionRule"
+            MetricName: !Sub "${ProjectName}-customer-${Env}-RuleIPSet-Allowed"
             SampledRequestsEnabled: true
-      Scope: CLOUDFRONT
-      VisibilityConfig:
-        CloudWatchMetricsEnabled: true
-        MetricName: !Sub "${Env}-RateRestrictionRuleGroup"
-        SampledRequestsEnabled: true
+
+  IPWhiteList:
+    Type: AWS::WAFv2::IPSet
+    Properties:
+      Addresses:
+        - !Sub ${WiFiIP}
+        - !Sub ${VPNIP}
+      IPAddressVersion: IPV4
+      Name: !Sub "${ProjectName}-customer-${Env}-ip-set2"
+      Scope: "CLOUDFRONT"
+
+  # RuleGroup:
+  #   Type: AWS::WAFv2::RuleGroup
+  #   Properties:
+  #     Capacity: 10
+  #     Name: !Sub "${Env}-RateRestrictionRuleGroup"
+  #     Rules:
+  #       - Action:
+  #           Block: {}
+  #         Name: !Sub "${Env}-RateRestrictionRule"
+  #         Priority: 0
+  #         Statement:
+  #           RateBasedStatement:
+  #             AggregateKeyType: IP
+  #             Limit: 100
+  #         VisibilityConfig:
+  #           CloudWatchMetricsEnabled: true
+  #           MetricName: !Sub "${Env}-RateRestrictionRule"
+  #           SampledRequestsEnabled: true
+  #     Scope: CLOUDFRONT
+  #     VisibilityConfig:
+  #       CloudWatchMetricsEnabled: true
+  #       MetricName: !Sub "${Env}-RateRestrictionRuleGroup"
+  #       SampledRequestsEnabled: true
 
   WafLogConfig:
     Type: AWS::WAFv2::LoggingConfiguration
