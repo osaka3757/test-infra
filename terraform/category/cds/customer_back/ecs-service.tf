@@ -4,8 +4,8 @@ resource "aws_ecs_service" "customer_api" {
   task_definition                    = "${aws_ecs_task_definition.customer_task.family}:${aws_ecs_task_definition.customer_task.revision}"
   desired_count                      = 1
   launch_type                        = "FARGATE"
-  deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 100
+  deployment_minimum_healthy_percent = 100
+  deployment_maximum_percent         = 200
   platform_version                   = "LATEST"
   enable_execute_command             = true
 
@@ -39,7 +39,7 @@ resource "aws_ecs_service" "customer_api" {
       platform_version,
       desired_count,
       task_definition,
-      load_balancer,
+      # load_balancer,
     ]
   }
   propagate_tags = "TASK_DEFINITION"

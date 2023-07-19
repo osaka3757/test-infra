@@ -76,17 +76,17 @@ terraform init -reconfigure -backend-config="../.env/stg.tfvars"
 # plan
 cd ~/terraform
 ./wrap-tf-cmd.bat plan cds stg category/cds/infra cds-stg
-./wrap-tf-cmd.bat plan cds stg category/cds/back cds-stg
+./wrap-tf-cmd.bat plan cds stg category/cds/customer_back cds-stg
 ./wrap-tf-cmd.bat plan cds stg category/cds/account_manage_back cds-stg
 
 # apply
 ./wrap-tf-cmd.bat apply cds stg category/cds/infra cds-stg
-./wrap-tf-cmd.bat apply cds stg category/cds/back cds-stg
+./wrap-tf-cmd.bat apply cds stg category/cds/customer_back cds-stg
 ./wrap-tf-cmd.bat apply cds stg category/cds/account_manage_back cds-stg
 
 # destroy(全てのAWSリソースを削除したい場合に実行する)
 ./wrap-tf-cmd.bat destroy cds stg category/cds/infra cds-stg
-./wrap-tf-cmd.bat destroy cds stg category/cds/back cds-stg
+./wrap-tf-cmd.bat destroy cds stg category/cds/customer_back cds-stg
 ./wrap-tf-cmd.bat destroy cds stg category/cds/account_manage_back cds-stg
 
 ```
