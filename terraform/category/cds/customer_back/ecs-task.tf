@@ -28,7 +28,21 @@ resource "aws_ecs_task_definition" "customer_task" {
     },
     "linuxParameters": {
       "initProcessEnabled": true
-    }
+    },
+    "secrets": [
+      {
+        "name": "COGNITO_REGION_NAME",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-resion-name::"
+      },
+      {
+        "name": "COGNITO_CLIENT_ID",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-client-id::"
+      },
+      {
+        "name": "COGNITO_CLIENT_SECRET",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-client-secret::"
+      }
+    ]
   }
 ]
 TASK_DEFINITION

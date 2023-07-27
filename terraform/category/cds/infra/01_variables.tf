@@ -33,3 +33,27 @@ variable "private_subnet_1a_cidr_block" {
 variable "private_subnet_1c_cidr_block" {
   type = string
 }
+
+variable "customer_cognito_resion_name" {
+  type = string
+}
+
+variable "customer_cognito_client_id" {
+  type = string
+}
+
+variable "customer_cognito_client_secret" {
+  type = string
+}
+
+variable "account_manager_cognito_resion_name" {
+  type = string
+}
+
+variable "account_manager_cognito_client_id" {
+  type = string
+}
+
+variable "account_manager_cognito_client_secret" {
+  type = string
+}

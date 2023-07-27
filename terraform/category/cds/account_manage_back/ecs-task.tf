@@ -23,9 +23,7 @@ resource "aws_ecs_task_definition" "account_manage_task" {
       "options": {
         "awslogs-group": "/ecs/${var.account_manage_prefix}",
         "awslogs-region": "ap-northeast-1",
-        "awslogs-stream-prefix": "${var.account_manage_prefix}",
-        "awslogs-region": ${data.aws_region.name}
-        "awslogs-create-group": true
+        "awslogs-stream-prefix": "${var.account_manage_prefix}"
       }
     },
     "linuxParameters": {
