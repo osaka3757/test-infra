@@ -30,17 +30,25 @@ resource "aws_ecs_task_definition" "customer_task" {
       "initProcessEnabled": true
     },
     "secrets": [
-      {
-        "name": "COGNITO_REGION_NAME",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-resion-name::"
+            {
+        "name": "APP_TITLE",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:app-title::"
+      },
+            {
+        "name": "COGNITO_CUSTOMER_REGION_NAME",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-customer-resion-name::"
       },
       {
-        "name": "COGNITO_CLIENT_ID",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-client-id::"
+        "name": "COGNITO_CUSTOMER_CLIENT_ID",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-customer-client-id::"
       },
       {
-        "name": "COGNITO_CLIENT_SECRET",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-client-secret::"
+        "name": "COGNITO_CUSTOMER_CLIENT_SECRET",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-customer-client-secret::"
+      },
+      {
+        "name": "CORS_ORIGINS",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cors-origins::"
       }
     ]
   }

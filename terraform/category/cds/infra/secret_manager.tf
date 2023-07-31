@@ -5,9 +5,11 @@ resource "aws_secretsmanager_secret" "customer" {
 resource "aws_secretsmanager_secret_version" "customer_version" {
   secret_id = aws_secretsmanager_secret.customer.id
   secret_string = jsonencode({
-    cognito-resion-name   = var.customer_cognito_resion_name,
-    cognito-client-id     = var.customer_cognito_client_id,
-    cognito-client-secret = var.customer_cognito_client_secret
+    app-title                      = var.customer_app_title,
+    cognito-customer-resion-name   = var.cognito_customer_resion_name,
+    cognito-customer-client-id     = var.cognito_customer_client_id,
+    cognito-customer-client-secret = var.cognito_customer_client_secret,
+    cors-origins                   = var.customer_cors_origins
   })
 }
 
@@ -18,8 +20,8 @@ resource "aws_secretsmanager_secret" "account_manager" {
 resource "aws_secretsmanager_secret_version" "account_manager_version" {
   secret_id = aws_secretsmanager_secret.account_manager.id
   secret_string = jsonencode({
-    cognito-resion-name   = var.account_manager_cognito_resion_name,
-    cognito-client-id     = var.account_manager_cognito_client_id,
-    cognito-client-secret = var.account_manager_cognito_client_secret
+    cognito-resion-name   = var.cognito_account_manager_resion_name,
+    cognito-client-id     = var.cognito_account_manager_client_id,
+    cognito-client-secret = var.cognito_account_manager_client_secret
   })
 }
