@@ -36,7 +36,7 @@ resource "aws_ecs_task_definition" "customer_task" {
       },
             {
         "name": "COGNITO_CUSTOMER_REGION_NAME",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-customer-resion-name::"
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-customer-region-name::"
       },
       {
         "name": "COGNITO_CUSTOMER_CLIENT_ID",

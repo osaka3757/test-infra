@@ -38,7 +38,7 @@ variable "customer_app_title" {
   type = string
 }
 
-variable "cognito_customer_resion_name" {
+variable "cognito_customer_region_name" {
   type = string
 }
 
@@ -54,7 +54,7 @@ variable "customer_cors_origins" {
   type = string
 }
 
-variable "cognito_account_manager_resion_name" {
+variable "cognito_account_manager_region_name" {
   type = string
 }
 
