@@ -1,21 +1,23 @@
 ## 課題
-- README.mdの整理
-- tflint入れたい
-- tfsec入れたい
-- terraform-docs入れたい
-- terraform-j2mdみたいなの入れたい
-- VSCodeにvscode-terraformをインストールしたら自動フォーマットかかるようにする
-- terraform plan時にAWSリソースで使用しない変数をアップロードしているとWarningが出ているので解消すること
+
+- README.md の整理
+- tflint 入れたい
+- tfsec 入れたい
+- terraform-docs 入れたい
+- terraform-j2md みたいなの入れたい
+- VSCode に vscode-terraform をインストールしたら自動フォーマットかかるようにする
+- terraform plan 時に AWS リソースで使用しない変数をアップロードしていると Warning が出ているので解消すること
 
 ## ディレクトリ構成　※整理中
+
 ```
 .
 ├── .vscode
 │   ├── extensions.json : VSCodeで使用をリコメンドするプラグインを定義します。
-│   └── settings.json : 
+│   └── settings.json :
 ├── frontend : 静的ウェブサイトをホスティングできるAWSリソースを作成。今後Terraform化するので詳細割愛。
 │   ├── README.md
-│   └── template.yaml 
+│   └── template.yaml
 └── terraform
     ├── enfironments : 各環境固有のAWSリソース作成ファイルや設定ファイルを格納する
     │   ├── dev
@@ -41,18 +43,21 @@
 ```
 
 ## 事前準備　※整理中
-- AWS CLIをインストール
+
+- AWS CLI をインストール
 - AWS プロファイルを設定
-- AWS プロファイルにMFA設定を追加
-- terraform-variables.tfのproject_nameを修正する
-- CodeStar Connection 作成後に手動で AWSコンソール Codepipeline 設定 接続から GitHub の認証を行う必要がある(初回のみ)
-  - [GitHub認証の参考サイト](https://zenn.dev/taroman_zenn/articles/4007a33384c6ad)
+- AWS プロファイルに MFA 設定を追加
+- terraform-variables.tf の project_name を修正する
+- CodeStar Connection 作成後に手動で AWS コンソール Codepipeline 設定 接続から GitHub の認証を行う必要がある(初回のみ)
+  - [GitHub 認証の参考サイト](https://zenn.dev/taroman_zenn/articles/4007a33384c6ad)
 
 ## 環境構築　※整理中
-- 環境名はdev/stg/prdを3環境を想定しています
-- backendのkeyの値を変更する必要がある
 
-1. TerraformのState管理用バックエンド作成(初回のみ)
+- 環境名は dev/stg/prd を 3 環境を想定しています
+- backend の key の値を変更する必要がある
+
+1. Terraform の State 管理用バックエンド作成(初回のみ)
+
 ```
 cd ~/shared
 
@@ -66,7 +71,8 @@ aws cloudformation deploy `
 --no-fail-on-empty-changeset
 ```
 
-2. 必要なAWSリソースを作成
+2. 必要な AWS リソースを作成
+
 ```
 ## ここもbatファイルにまとめる
 cd ~/category/AWSアカウント/プロジェクト
@@ -91,19 +97,16 @@ cd ~/terraform
 
 ```
 
-
 ### 退避場所
+
 rem 引数説明
-rem %1=terraformコマンド(plan/apply)
+rem %1=terraform コマンド(plan/apply)
 rem %2=プロジェクト名
 rem %3=環境名(prd/stg/dev/person)
-rem %4=terraform実行ファイルがあるディレクトリ
+rem %4=terraform 実行ファイルがあるディレクトリ
 rem %5=プロファイル名
 
-aws cloudformation deploy `
---profile cds-stg `
---stack-name cds-stg-terraform-backend `
---template-file terraform-backend.yaml `
---parameter-overrides Env=stg ProjectName=cds `
---region ap-northeast-1 `
+aws cloudformation deploy `--profile cds-stg`
+--stack-name cds-stg-terraform-backend `--template-file terraform-backend.yaml`
+--parameter-overrides Env=stg ProjectName=cds `--region ap-northeast-1`
 --no-fail-on-empty-changeset

@@ -28,7 +28,33 @@ resource "aws_ecs_task_definition" "account_manage_task" {
     },
     "linuxParameters": {
       "initProcessEnabled": true
-    }
+    },
+    "secrets": [
+      {
+        "name": "APP_TITLE",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:app-title::"
+      },
+            {
+        "name": "COGNITO_ACCOUNT_MANAGER_REGION_NAME",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:cognito-account-manager-region-name::"
+      },
+      {
+        "name": "COGNITO_ACCOUNT_MANAGER_CLIENT_ID",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:cognito-account-manager-client-id::"
+      },
+      {
+        "name": "COGNITO_ACCOUNT_MANAGER_CLIENT_SECRET",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:cognito-account-manager-client-secret::"
+      },
+      {
+        "name": "COGNITO_ACCOUNT_MANAGER_USER_POOL_ID",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:cognito-account-manager-user-pool-id::"
+      },
+      {
+        "name": "CORS_ORIGINS",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:account-manager-cors-origins::"
+      }
+    ]
   }
 ]
 TASK_DEFINITION

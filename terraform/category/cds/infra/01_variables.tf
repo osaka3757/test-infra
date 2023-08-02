@@ -54,6 +54,10 @@ variable "customer_cors_origins" {
   type = string
 }
 
+variable "account_manager_app_title" {
+  type = string
+}
+
 variable "cognito_account_manager_region_name" {
   type = string
 }
@@ -63,5 +67,13 @@ variable "cognito_account_manager_client_id" {
 }
 
 variable "cognito_account_manager_client_secret" {
+  type = string
+}
+
+variable "cognito_account_manager_user_pool_id" {
+  type = string
+}
+
+variable "account_manager_cors_origins" {
   type = string
 }
