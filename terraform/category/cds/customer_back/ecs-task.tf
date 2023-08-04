@@ -5,7 +5,7 @@ resource "aws_ecs_task_definition" "customer_task" {
   execution_role_arn       = aws_iam_role.task_execution.arn
   task_role_arn            = aws_iam_role.task_execution.arn
   cpu                      = "256"
-  memory                   = "1024"
+  memory                   = "512"
   container_definitions    = <<TASK_DEFINITION
 [
   {
@@ -47,8 +47,8 @@ resource "aws_ecs_task_definition" "customer_task" {
         "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-customer-client-secret::"
       },
       {
-        "name": "CORS_ORIGINS",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cors-origins::"
+        "name": "ORIGIN_WHITELIST",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:customer-origin-whitelist::"
       }
     ]
   }

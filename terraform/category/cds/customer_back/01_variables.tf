@@ -1,5 +1,9 @@
-locals {
-  frontend_repository_path = "osaka3757/cds-customer-frontend"
+variable "cds_customer_frontend_repository_path" {
+  type = string
+}
+
+variable "cds_customer_back_repository_path" {
+  type = string
 }
 
 variable "customer_prefix" {
@@ -7,6 +11,18 @@ variable "customer_prefix" {
 }
 
 variable "state_bucket" {
+  type = string
+}
+
+variable "github_account" {
+  type = string
+}
+
+variable "branch" {
+  type = string
+}
+
+variable "github_secret_token" {
   type = string
 }
 
