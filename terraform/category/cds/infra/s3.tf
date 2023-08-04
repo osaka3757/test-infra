@@ -1,9 +1,10 @@
-resource "aws_s3_bucket" "codepipeline_bucket" {
-  bucket = "${var.customer_prefix}-codepipeline-bucket"
+resource "aws_s3_bucket" "codepipeline_artifact" {
+  bucket = "${var.project_prefix}-codepipeline-artifact"
+  acl    = "private"
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "codepipeline_bucket_lifecycle" {
-  bucket = aws_s3_bucket.codepipeline_bucket.id
+  bucket = aws_s3_bucket.codepipeline_artifact.id
 
   rule {
     id     = "delete_1day"
@@ -15,8 +16,3 @@ resource "aws_s3_bucket_lifecycle_configuration" "codepipeline_bucket_lifecycle"
   }
 
 }
-
-# resource "aws_s3_bucket_acl" "codepipeline_bucket_acl" {
-#   bucket = aws_s3_bucket.codepipeline_bucket.id
-#   acl    = "private"
-# }

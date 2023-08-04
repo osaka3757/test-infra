@@ -3,6 +3,6 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "${var.project_name}-client-${var.env}-igw"
+    Name = "${var.project_prefix}-customer-igw"
   }
 }

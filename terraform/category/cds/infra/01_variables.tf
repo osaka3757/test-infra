@@ -1,7 +1,3 @@
-locals {
-  frontend_repository_path = "osaka3757/cds-customer-frontend"
-}
-
 variable "profile" {
   type = string
 }
@@ -13,6 +9,10 @@ variable "project_name" {
 variable "env" {
   type    = string
   default = "dev"
+}
+
+variable "project_prefix" {
+  type = string
 }
 
 variable "customer_prefix" {
@@ -59,7 +59,7 @@ variable "cognito_customer_client_secret" {
   type = string
 }
 
-variable "customer_cors_origins" {
+variable "customer_origin_whitelist" {
   type = string
 }
 
@@ -83,6 +83,6 @@ variable "cognito_account_manager_user_pool_id" {
   type = string
 }
 
-variable "account_manager_cors_origins" {
+variable "account_manager_origin_whitelist" {
   type = string
 }

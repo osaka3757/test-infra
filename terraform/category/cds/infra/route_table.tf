@@ -3,7 +3,7 @@ resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "${var.project_name}-client-${var.env}-public-route-table"
+    Name = "${var.project_prefix}-customer-public-route-table"
   }
 }
 
@@ -11,7 +11,7 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "${var.project_name}-client-${var.env}-private-route-table"
+    Name = "${var.project_prefix}-customer-private-route-table"
   }
 }
 

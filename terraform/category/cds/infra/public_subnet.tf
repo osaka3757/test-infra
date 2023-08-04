@@ -6,7 +6,7 @@ resource "aws_subnet" "public_1a" {
   vpc_id            = aws_vpc.main.id
 
   tags = {
-    Name = "${var.project_name}-client-${var.env}-public-subnet-1a"
+    Name = "${var.project_prefix}-customer-public-subnet-1a"
   }
 }
 
@@ -17,7 +17,7 @@ resource "aws_subnet" "public_1c" {
   vpc_id            = aws_vpc.main.id
 
   tags = {
-    Name = "${var.project_name}-client-${var.env}-public-subnet-1c"
+    Name = "${var.project_prefix}-customer-public-subnet-1c"
   }
 }
 

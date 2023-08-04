@@ -26,16 +26,24 @@ output "iam_role_codebuild_arn" {
   value = aws_iam_role.codebuild.arn
 }
 
+output "iam_role_codedeploy_arn" {
+  value = aws_iam_role.codedeploy_role.arn
+}
+
 output "iam_role_codepipeline_arn" {
   value = aws_iam_role.codepipeline_role.arn
 }
 
-output "s3_codepipeline_bucket" {
-  value = aws_s3_bucket.codepipeline_bucket.bucket
+output "iam_role_codepipeline_id" {
+  value = aws_iam_role.codepipeline_role.id
 }
 
-output "codestar_github_arn" {
-  value = aws_codestarconnections_connection.github.arn
+output "s3_codepipeline_bucket" {
+  value = aws_s3_bucket.codepipeline_artifact.bucket
+}
+
+output "s3_codepipeline_arn" {
+  value = aws_s3_bucket.codepipeline_artifact.arn
 }
 
 # ------------------------------------------------------------#
