@@ -1,5 +1,5 @@
 resource "aws_secretsmanager_secret" "customer" {
-  name = "${var.env}-customer"
+  name = "${var.customer_prefix}-secrets-manager"
 }
 
 resource "aws_secretsmanager_secret_version" "customer_version" {
@@ -9,12 +9,12 @@ resource "aws_secretsmanager_secret_version" "customer_version" {
     cognito-customer-region-name   = var.cognito_customer_region_name,
     cognito-customer-client-id     = var.cognito_customer_client_id,
     cognito-customer-client-secret = var.cognito_customer_client_secret,
-    cors-origins                   = var.customer_cors_origins
+    customer-origin-whitelist      = var.customer_origin_whitelist
   })
 }
 
 resource "aws_secretsmanager_secret" "account_manager" {
-  name = "${var.env}-account-manager"
+  name = "${var.account_manage_prefix}-secrets-manager"
 }
 
 resource "aws_secretsmanager_secret_version" "account_manager_version" {
@@ -25,6 +25,6 @@ resource "aws_secretsmanager_secret_version" "account_manager_version" {
     cognito-account-manager-client-id     = var.cognito_account_manager_client_id,
     cognito-account-manager-client-secret = var.cognito_account_manager_client_secret,
     cognito-account-manager-user-pool-id  = var.cognito_account_manager_user_pool_id,
-    account-manager-cors-origins          = var.account_manager_cors_origins
+    account-manager-origin-whitelist      = var.account_manager_origin_whitelist
   })
 }
