@@ -19,7 +19,8 @@ resource "aws_ecs_service" "account_manage_api" {
   }
 
   # タスク起動時のヘルスチェック猶予期間
-  health_check_grace_period_seconds = 360
+  # TODO 猶予期間の検討
+  health_check_grace_period_seconds = 3600
 
   # ECSタスクの起動後に紐付けるELBターゲットグループ
   load_balancer {

@@ -5,6 +5,7 @@ locals {
 variable "profile" {
   type = string
 }
+
 variable "project_name" {
   type = string
 }
@@ -12,6 +13,14 @@ variable "project_name" {
 variable "env" {
   type    = string
   default = "dev"
+}
+
+variable "customer_prefix" {
+  type = string
+}
+
+variable "account_manage_prefix" {
+  type = string
 }
 
 variable "vpc_cidr_block" {

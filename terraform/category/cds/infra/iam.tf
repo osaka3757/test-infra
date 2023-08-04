@@ -1,4 +1,8 @@
-data "aws_iam_policy_document" "assume_role" {
+# ------------------------------------------------------------#
+#  IAM codebuild
+# ------------------------------------------------------------#
+
+data "aws_iam_policy_document" "codebuild_assume_role" {
   statement {
     effect = "Allow"
 
@@ -13,7 +17,7 @@ data "aws_iam_policy_document" "assume_role" {
 
 resource "aws_iam_role" "codebuild" {
   name               = "codebuild-assume-role"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  assume_role_policy = data.aws_iam_policy_document.codebuild_assume_role.json
 }
 
 data "aws_iam_policy_document" "codebuild" {
@@ -82,61 +86,24 @@ resource "aws_iam_role_policy" "codebuild" {
   policy = data.aws_iam_policy_document.codebuild.json
 }
 
-resource "aws_codebuild_project" "codebuild" {
-  name          = "${var.env}-${var.project_name}-codebuild"
-  description   = "${var.env}_${var.project_name}_codebuild_project"
-  build_timeout = "5"
-  service_role  = aws_iam_role.codebuild.arn
+# ------------------------------------------------------------#
+#  IAM codepipeline
+# ------------------------------------------------------------#
 
-  artifacts {
-    type = "NO_ARTIFACTS"
-  }
+data "aws_iam_policy_document" "codepipeline_assume_role" {
+  statement {
+    effect = "Allow"
 
-  # cache {
-  #   type     = "S3"
-  #   location = var.s3_artifact_name
-  # }
-
-  environment {
-    compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "aws/codebuild/amazonlinux2-x86_64-standard:5.0"
-    type                        = "LINUX_CONTAINER"
-    image_pull_credentials_type = "CODEBUILD"
-    privileged_mode             = true
-
-    environment_variable {
-      name  = "PROJECT_NAME"
-      value = var.project_name
+    principals {
+      type        = "Service"
+      identifiers = ["codepipeline.amazonaws.com"]
     }
 
-    environment_variable {
-      name  = "ENV"
-      value = var.env
-    }
+    actions = ["sts:AssumeRole"]
   }
+}
 
-  logs_config {
-    cloudwatch_logs {
-      group_name  = "/code-build/${var.env}/${var.project_name}"
-      stream_name = "build"
-    }
-
-    # s3_logs {
-    #   status   = "ENABLED"
-    #   location = "${aws_s3_bucket.example.id}/build-log"
-    # }
-  }
-
-  source {
-    type            = "GITHUB"
-    location        = "https://github.com/osaka3757/cds-customer-frontend.git"
-    git_clone_depth = 1
-
-    git_submodules_config {
-      fetch_submodules = true
-    }
-  }
-
-  source_version = "main"
-
+resource "aws_iam_role" "codepipeline_role" {
+  name               = "test-role"
+  assume_role_policy = data.aws_iam_policy_document.codepipeline_assume_role.json
 }

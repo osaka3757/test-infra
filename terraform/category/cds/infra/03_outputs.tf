@@ -22,8 +22,24 @@ output "private_route_table_id" {
   value = aws_route_table.private.id
 }
 
+output "iam_role_codebuild_arn" {
+  value = aws_iam_role.codebuild.arn
+}
+
+output "iam_role_codepipeline_arn" {
+  value = aws_iam_role.codepipeline_role.arn
+}
+
+output "s3_codepipeline_bucket" {
+  value = aws_s3_bucket.codepipeline_bucket.bucket
+}
+
+output "codestar_github_arn" {
+  value = aws_codestarconnections_connection.github.arn
+}
+
 # ------------------------------------------------------------#
-#  SecretsManager ARN
+#  Secrets Manager ARN
 # ------------------------------------------------------------#
 output "secretsmanager_customer_arn" {
   value = aws_secretsmanager_secret.customer.arn

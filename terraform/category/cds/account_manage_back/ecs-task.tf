@@ -51,8 +51,8 @@ resource "aws_ecs_task_definition" "account_manage_task" {
         "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:cognito-account-manager-user-pool-id::"
       },
       {
-        "name": "CORS_ORIGINS",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:account-manager-cors-origins::"
+        "name": "ORIGIN_WHITELIST",
+        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:account-manager-origin-whitelist::"
       }
     ]
   }

@@ -1,8 +1,12 @@
-locals {
-  frontend_repository_path = "osaka3757/cds-customer-frontend"
+variable "cds_account_manager_frontend_repository_path" {
+  type = string
 }
 
 variable "account_manage_prefix" {
+  type = string
+}
+
+variable "branch" {
   type = string
 }
 
