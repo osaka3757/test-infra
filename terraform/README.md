@@ -97,7 +97,7 @@ cd ~/terraform
 
 ```
 
-### 退避場所
+### コマンド退避場所
 
 rem 引数説明
 rem %1=terraform コマンド(plan/apply)

@@ -1,14 +1,17 @@
 ## 課題
-- terraformに変換
-- CloudFrontとWAFのリージョンはグローバル、S3は東京リージョンで分割する
+
+- terraform に変換
+- 【済】CloudFront と WAF のリージョンはグローバル、S3 は東京リージョンで分割する
 
 ## ざっくり説明
-- 静的ウェブサイトをS3で使用してWeb公開できるようにAWSリソースを作成できる
-- CloudFunctionでBasic認証実装
-- 同IPから5分間に100回以上のアクセスがあった場合、制限かかります(WAFv2)
-- OACを使用して、CloudFront経由でのみS3に格納した静的ウェブサイトにアクセスできます
+
+- 静的ウェブサイトを S3 で使用して Web 公開できるように AWS リソースを作成できる
+- CloudFunction で Basic 認証実装
+- 同 IP から 5 分間に 100 回以上のアクセスがあった場合、制限かかります(WAFv2)
+- OAC を使用して、CloudFront 経由でのみ S3 に格納した静的ウェブサイトにアクセスできます
 
 ## デプロイコマンド
+
 ```
 # S3
 aws cloudformation deploy `

@@ -45,14 +45,3 @@ output "s3_codepipeline_bucket" {
 output "s3_codepipeline_arn" {
   value = aws_s3_bucket.codepipeline_artifact.arn
 }
-
-# ------------------------------------------------------------#
-#  Secrets Manager ARN
-# # ------------------------------------------------------------#
-# output "secretsmanager_customer_arn" {
-#   value = aws_secretsmanager_secret.customer.arn
-# }
-
-# output "secretsmanager_account_manager_arn" {
-#   value = aws_secretsmanager_secret.account_manager.arn
-# }
