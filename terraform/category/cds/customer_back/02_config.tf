@@ -10,7 +10,7 @@ terraform {
   backend "s3" {
     # stateファイルの保存先情報はenvフォルダ配下のtfvarsファイルに記入
     region  = "ap-northeast-1"
-    key     = "back/terraform.tfstate"
+    key     = "customer_back/terraform.tfstate"
     encrypt = true
   }
 }

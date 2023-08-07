@@ -32,27 +32,43 @@ resource "aws_ecs_task_definition" "account_manage_task" {
     "secrets": [
       {
         "name": "APP_TITLE",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:app-title::"
+        "valueFrom": "${aws_secretsmanager_secret.account_manager.arn}:app-title::"
       },
-            {
+      {
         "name": "COGNITO_ACCOUNT_MANAGER_REGION_NAME",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:cognito-account-manager-region-name::"
+        "valueFrom": "${aws_secretsmanager_secret.account_manager.arn}:cognito-account-manager-region-name::"
       },
       {
         "name": "COGNITO_ACCOUNT_MANAGER_CLIENT_ID",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:cognito-account-manager-client-id::"
+        "valueFrom": "${aws_secretsmanager_secret.account_manager.arn}:cognito-account-manager-client-id::"
       },
       {
         "name": "COGNITO_ACCOUNT_MANAGER_CLIENT_SECRET",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:cognito-account-manager-client-secret::"
+        "valueFrom": "${aws_secretsmanager_secret.account_manager.arn}:cognito-account-manager-client-secret::"
       },
       {
         "name": "COGNITO_ACCOUNT_MANAGER_USER_POOL_ID",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:cognito-account-manager-user-pool-id::"
+        "valueFrom": "${aws_secretsmanager_secret.account_manager.arn}:cognito-account-manager-user-pool-id::"
       },
       {
         "name": "ORIGIN_WHITELIST",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_account_manager_arn}:account-manager-origin-whitelist::"
+        "valueFrom": "${aws_secretsmanager_secret.account_manager.arn}:account-manager-origin-whitelist::"
+      },
+      {
+        "name": "COGNITO_CUSTOMER_REGION_NAME",
+        "valueFrom": "${aws_secretsmanager_secret.account_manager.arn}:cognito-customer-region-name::"
+      },
+      {
+        "name": "COGNITO_CUSTOMER_CLIENT_ID",
+        "valueFrom": "${aws_secretsmanager_secret.account_manager.arn}:cognito-customer-client-id::"
+      },
+      {
+        "name": "COGNITO_CUSTOMER_CLIENT_SECRET",
+        "valueFrom": "${aws_secretsmanager_secret.account_manager.arn}:cognito-customer-client-secret::"
+      },
+      {
+        "name": "COGNITO_CUSTOMER_USER_POOL_ID",
+        "valueFrom": "${aws_secretsmanager_secret.account_manager.arn}:cognito-customer-user-pool-id::"
       }
     ]
   }

@@ -9,7 +9,7 @@ resource "aws_ecs_task_definition" "customer_task" {
   container_definitions    = <<TASK_DEFINITION
 [
   {
-    "name": "${var.customer_prefix}-container",
+    "name": "${var.project_name}-customer-container",
     "image": "${data.aws_caller_identity.current.account_id}.dkr.ecr.ap-northeast-1.amazonaws.com/${aws_ecr_repository.customer_api.name}:1.0.0",
     "portMappings": [
       {
@@ -30,25 +30,25 @@ resource "aws_ecs_task_definition" "customer_task" {
       "initProcessEnabled": true
     },
     "secrets": [
-            {
+      {
         "name": "APP_TITLE",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:app-title::"
+        "valueFrom": "${aws_secretsmanager_secret.customer.arn}:app-title::"
       },
             {
         "name": "COGNITO_CUSTOMER_REGION_NAME",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-customer-region-name::"
+        "valueFrom": "${aws_secretsmanager_secret.customer.arn}:cognito-customer-region-name::"
       },
       {
         "name": "COGNITO_CUSTOMER_CLIENT_ID",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-customer-client-id::"
+        "valueFrom": "${aws_secretsmanager_secret.customer.arn}:cognito-customer-client-id::"
       },
       {
         "name": "COGNITO_CUSTOMER_CLIENT_SECRET",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:cognito-customer-client-secret::"
+        "valueFrom": "${aws_secretsmanager_secret.customer.arn}:cognito-customer-client-secret::"
       },
       {
         "name": "ORIGIN_WHITELIST",
-        "valueFrom": "${data.terraform_remote_state.infra.outputs.secretsmanager_customer_arn}:customer-origin-whitelist::"
+        "valueFrom": "${aws_secretsmanager_secret.customer.arn}:customer-origin-whitelist::"
       }
     ]
   }
@@ -57,7 +57,7 @@ TASK_DEFINITION
 }
 
 resource "aws_iam_role" "task_execution" {
-  name = "${var.project_name}-TaskExecution"
+  name = "${var.customer_prefix}-TaskExecution"
 
   assume_role_policy = <<EOF
 {

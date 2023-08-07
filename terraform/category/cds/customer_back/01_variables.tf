@@ -6,6 +6,18 @@ variable "cds_customer_back_repository_path" {
   type = string
 }
 
+variable "customer_app_title" {
+  type = string
+}
+
+variable "cognito_customer_region_name" {
+  type = string
+}
+
+variable "customer_origin_whitelist" {
+  type = string
+}
+
 variable "customer_prefix" {
   type = string
 }

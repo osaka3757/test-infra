@@ -2,6 +2,22 @@ variable "cds_account_manager_frontend_repository_path" {
   type = string
 }
 
+variable "account_manager_app_title" {
+  type = string
+}
+
+variable "account_manager_origin_whitelist" {
+  type = string
+}
+
+variable "cognito_account_manager_region_name" {
+  type = string
+}
+
+variable "cognito_customer_region_name" {
+  type = string
+}
+
 variable "account_manage_prefix" {
   type = string
 }

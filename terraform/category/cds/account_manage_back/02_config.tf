@@ -31,6 +31,17 @@ data "terraform_remote_state" "infra" {
   }
 }
 
+data "terraform_remote_state" "customer" {
+  backend = "s3"
+
+  config = {
+    bucket  = var.state_bucket
+    region  = "ap-northeast-1"
+    key     = "customer_back/terraform.tfstate"
+    profile = var.profile
+  }
+}
+
 data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}

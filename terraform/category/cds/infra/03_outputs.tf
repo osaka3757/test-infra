@@ -48,11 +48,11 @@ output "s3_codepipeline_arn" {
 
 # ------------------------------------------------------------#
 #  Secrets Manager ARN
-# ------------------------------------------------------------#
-output "secretsmanager_customer_arn" {
-  value = aws_secretsmanager_secret.customer.arn
-}
+# # ------------------------------------------------------------#
+# output "secretsmanager_customer_arn" {
+#   value = aws_secretsmanager_secret.customer.arn
+# }
 
-output "secretsmanager_account_manager_arn" {
-  value = aws_secretsmanager_secret.account_manager.arn
-}
+# output "secretsmanager_account_manager_arn" {
+#   value = aws_secretsmanager_secret.account_manager.arn
+# }

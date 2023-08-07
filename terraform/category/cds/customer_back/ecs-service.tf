@@ -25,7 +25,7 @@ resource "aws_ecs_service" "customer_api" {
   # ECSタスクの起動後に紐付けるELBターゲットグループ
   load_balancer {
     target_group_arn = aws_lb_target_group.alb_target_blue.arn
-    container_name   = "${var.customer_prefix}-container"
+    container_name   = "${var.project_name}-customer-container"
     container_port   = 80
   }
 
